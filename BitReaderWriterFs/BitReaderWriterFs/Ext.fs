@@ -1,14 +1,16 @@
 ﻿namespace BitReaderWriterFs
 
 open System
+open System.Collections
 open System.IO
 
 [<AutoOpen>]
 module internal Ext =
     type Byte with
-        member this.ToBitSequence () = seq {
-            for i in 7..-1..0 do 
-                yield ((this >>> i) &&& 1uy) = 1uy
+        member this.ToBitSequence () = 
+            seq {
+                for i in 7..-1..0 do 
+                    yield ((this >>> i) &&& 1uy) = 1uy
             }
 
     type Stream with
@@ -20,3 +22,7 @@ module internal Ext =
                     for i in 7..-1..0 do 
                         yield ((!readByte >>> i) &&& 1) = 1
             }
+
+    type BitArray with
+        member this.Dump() =
+            String.Join(",", seq { for flag in this -> flag.ToString().ToLower() } |> Seq.toArray)
