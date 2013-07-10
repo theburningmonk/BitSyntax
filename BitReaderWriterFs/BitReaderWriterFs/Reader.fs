@@ -36,13 +36,14 @@ module internal Helpes =
     let convertToString                    = convertToBytes >> Text.Encoding.Default.GetString
 
 type BitsCount = | N of int | Rest
+type BitReader<'a> = BitReader of BitsCount * (BitArray -> 'a)
 
 type BitReaderBuilder (enumerator : IEnumerator<bool>) =
     let mutable bitArrays = []
     let next () = if enumerator.MoveNext() then enumerator.Current else failwithf "Insufficient bits"
     let rest () = [| while enumerator.MoveNext() do yield enumerator.Current |]
 
-    member this.Bind((count, f : BitArray -> 'a), cont : 'a -> 'b) =
+    member this.Bind(BitReader(count, f), cont : 'a -> 'b) =
         let bitArr = match count with
                      | N n  -> BitArray([| for i = 1 to n do yield next() |])
                      | Rest -> BitArray(rest())
@@ -52,22 +53,22 @@ type BitReaderBuilder (enumerator : IEnumerator<bool>) =
 
 /// Container for helper functions
 type Bits =
-    static member Skip n            = N n, (fun _ -> ())
-                                 
-    static member ReadInt16 (?n)    = N(defaultArg n 16), convertToInt16
-    static member ReadUint16 (?n)   = N(defaultArg n 16), convertToUint16
-    static member ReadInt32 (?n)    = N(defaultArg n 32), convertToInt32
-    static member ReadUint32 (?n)   = N(defaultArg n 32), convertToUint32    
-    static member ReadInt64 (?n)    = N(defaultArg n 64), convertToInt64
-    static member ReadUint64 (?n)   = N(defaultArg n 64), convertToUint64
+    static member Skip n            = BitReader <| (N n, (fun _ -> ()))
 
-    static member ReadBool ()       = N 1, convertToBool
-    static member ReadBytes n       = N n, convertToBytes
-    static member ReadChar (?n)     = N(defaultArg n 8), convertToChar
-    static member ReadString n      = N n, convertToString
+    static member ReadInt16 (?n)    = BitReader <| (N(defaultArg n 16), convertToInt16)
+    static member ReadUint16 (?n)   = BitReader <| (N(defaultArg n 16), convertToUint16)
+    static member ReadInt32 (?n)    = BitReader <| (N(defaultArg n 32), convertToInt32)
+    static member ReadUint32 (?n)   = BitReader <| (N(defaultArg n 32), convertToUint32)    
+    static member ReadInt64 (?n)    = BitReader <| (N(defaultArg n 64), convertToInt64)
+    static member ReadUint64 (?n)   = BitReader <| (N(defaultArg n 64), convertToUint64)
 
-    static member ReadAs n f        = N n, convertToBytes >> f
-    static member ReadRest ()       = Rest, convertToBytes
+    static member ReadBool ()       = BitReader <|(N 1, convertToBool)
+    static member ReadBytes n       = BitReader <|(N n, convertToBytes)
+    static member ReadChar (?n)     = BitReader <|(N(defaultArg n 8), convertToChar)
+    static member ReadString n      = BitReader <|(N n, convertToString)
+
+    static member ReadAs n f        = BitReader <| (N n, convertToBytes >> f)
+    static member ReadRest ()       = BitReader <| (Rest, convertToBytes)
 
 [<AutoOpen>]
 module ReaderWorkflow = 
