@@ -14,14 +14,14 @@ stream.WriteByte(129uy)
 stream.Write(Text.Encoding.ASCII.GetBytes("Hello World!"), 0, 12)
 
 let allT, allF, t, sixFOneT, bytes, world, ``!`` = bitReader stream {
-        let! allT     = Bits.ReadInt32(4)
-        do! Bits.Skip(8)
-        let! allF     = Bits.ReadInt32(4)
-        let! t        = Bits.ReadBool()
-        let! sixFOneT = Bits.ReadInt32(7)
-        let! bytes'   = Bits.ReadBytes(8*6)
-        let! world    = Bits.ReadString(5 * 8)
-        let! ``!``    = Bits.ReadChar()
+        let! allT     = BitReader.ReadInt32(4)
+        do! BitReader.Skip(8)
+        let! allF     = BitReader.ReadInt32(4)
+        let! t        = BitReader.ReadBool()
+        let! sixFOneT = BitReader.ReadInt32(7)
+        let! bytes'   = BitReader.ReadBytes(8*6)
+        let! world    = BitReader.ReadString(5 * 8)
+        let! ``!``    = BitReader.ReadChar()
 
         return allT, allF, t, sixFOneT, bytes', world, ``!``
     }

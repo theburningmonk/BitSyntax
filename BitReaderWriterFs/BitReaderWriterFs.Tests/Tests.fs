@@ -22,7 +22,7 @@ let z =
 
 type State<'a, 's> = State of ('s -> 'a * 's)
 
-let runState (State s) a = s a
+let runState (State f) s = f s
 let getState    = State (fun s -> (s, s))
 let putState s  = State (fun _ -> ((), s))
 
@@ -42,6 +42,27 @@ let lift f =
         let! s = getState
         return! putState (f s)
     }
+
+let DoSomething counter = 
+    printfn "DoSomething. Counter=%i " counter
+    counter + 1
+
+let FinalResult counter = 
+    printfn "FinalResult. Counter=%i " counter
+    counter
+
+let DoSomething' = lift DoSomething
+let FinalResult' = lift FinalResult
+
+let counterWorkflow = 
+    let s = state {
+        do! DoSomething'
+        do! DoSomething'
+        do! DoSomething'
+        do! FinalResult'
+        return "ok"
+        } 
+    runState s 0
 
 type MaybeBuilder () =
     member this.Bind(x, f) = Option.bind f x
