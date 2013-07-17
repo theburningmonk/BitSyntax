@@ -29,6 +29,24 @@ module internal Ext =
         member this.Dump() =
             String.Join(",", seq { for flag in this -> flag.ToString().ToLower() } |> Seq.toArray)
 
+module Seq =
+    let chunk n (source : seq<'a>) = 
+        use ie = source.GetEnumerator()
+        let sourceIsEmpty = ref false
+        let rec loop () =
+            seq {
+                if ie.MoveNext () then
+                    yield [| yield ie.Current
+                             for x in 2 .. n do
+                                if ie.MoveNext() then yield ie.Current
+                                else sourceIsEmpty := true |]
+                    
+                    match !sourceIsEmpty with
+                    | false -> yield! loop ()
+                    | true  -> ()
+            }
+        loop ()
+
 type Count      = | N of int | Rest
 type Reader<'a> = Reader of Count * (BitArray -> 'a)
 
@@ -84,6 +102,14 @@ type BitWriter private () =
         let bits = bytes |> Seq.collect (fun byte -> byte.ToBitSequence()) |> Seq.take n |> Seq.toArray
         BitArray(bits)
 
+    static member toByte (bits : bool[]) =
+        let mutable byte = 0uy
+        for i = 0 to 7 do
+            if bits.[i] 
+            then byte <- byte <<< 1 ||| 1uy 
+            else byte <- byte <<< 1
+        byte
+
     static member WriteInt16  (x : int16, ?n)   = toBitArray (defaultArg n 16) <| BitConverter.GetBytes(x)
     static member WriteUint16 (x : uint16, ?n)  = toBitArray (defaultArg n 16) <| BitConverter.GetBytes(x)
     static member WriteInt32  (x : int, ?n)     = toBitArray (defaultArg n 32) <| BitConverter.GetBytes(x)
@@ -98,7 +124,18 @@ type BitWriter private () =
     static member WriteChar   (x : char, ?n)    = toBitArray (defaultArg n 8) <| BitConverter.GetBytes(x)
     static member WriteString (x : string, ?n)  = toBitArray (defaultArg n (x.Length * 8)) <| Text.Encoding.UTF8.GetBytes(x)
 
-    static member To
+    static member Flush (stream : Stream) (bitArrays : seq<BitArray>) =
+        let bits = 
+            bitArrays 
+            |> Seq.collect (fun bitArray -> seq { for n = 0 to bitArray.Length - 1 do yield bitArray.[n] })
+            |> Seq.toArray
+
+        bits
+        |> Seq.chunk 8 
+        |> Seq.map BitWriter.toByte
+        |> Seq.iter stream.WriteByte
+
+        stream.Flush()
 
 /// Reader workflow
 [<AutoOpen>]
@@ -108,12 +145,15 @@ module ReaderWorkflow =
         let next () = if enumerator.MoveNext() then enumerator.Current else failwithf "Insufficient bits"
         let rest () = [| while enumerator.MoveNext() do yield enumerator.Current |]
 
-        member this.Bind(Reader(count, f), cont : 'a -> 'b) =
+        let read (Reader(count, f)) =
             let bitArr = match count with
                          | N n  -> BitArray([| for i = 1 to n do yield next() |])
                          | Rest -> BitArray(rest())
-            cont(f bitArr)
+            f bitArr
+
+        member this.Bind(x, cont : 'a -> 'b) = cont(read x)
         
-        member this.Return x = x
+        member this.Return x     = x
+        member this.ReturnFrom x = read x
 
     let bitReader (stream : Stream) = BitReaderBuilder(stream.ToBitSequence().GetEnumerator())
