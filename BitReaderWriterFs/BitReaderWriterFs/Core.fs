@@ -9,20 +9,14 @@ open System.IO
 [<AutoOpen>]
 module internal Ext =
     type Byte with
-        member this.ToBitSequence () = 
-            seq {
-                for i in 7..-1..0 do 
-                    yield ((this >>> i) &&& 1uy) = 1uy
-            }
+        member this.ToBitSequence () = seq { for i in 7..-1..0 -> ((this >>> i) &&& 1uy) = 1uy }
 
     type Stream with
-        /// Extension method for getting a sequence of bits from a stream
         member this.ToBitSequence () = 
             let readByte = ref 0
             seq {
                 while (readByte := this.ReadByte(); !readByte >= 0) do
-                    for i in 7..-1..0 do 
-                        yield ((!readByte >>> i) &&& 1) = 1
+                    for i in 7..-1..0 -> ((!readByte >>> i) &&& 1) = 1
             }
 
     type BitArray with
@@ -124,6 +118,7 @@ type BitWriter private () =
     static member WriteChar   (x : char, ?n)    = toBitArray (defaultArg n 8) <| BitConverter.GetBytes(x)
     static member WriteString (x : string, ?n)  = toBitArray (defaultArg n (x.Length * 8)) <| Text.Encoding.UTF8.GetBytes(x)
 
+    /// Flushing a sequence of BitArray to the specified stream
     static member Flush (stream : Stream) (bitArrays : seq<BitArray>) =
         let bits = 
             bitArrays 

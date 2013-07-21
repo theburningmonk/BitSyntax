@@ -1,127 +1,38 @@
 ﻿module Tests
 
-type LoggingBuilder () =
-    let log p = printfn "Expression is %A" p
+open BitReaderWriterFs
+open FsUnit
+open NUnit.Framework
 
-    member thid.Bind(x, f) =
-        log x
-        f x
+[<TestFixture>]
+type ``Given a byte`` () =
+    [<TestCase(0uy,   Result = [| false; false; false; false; false; false; false; false |])>]
+    [<TestCase(1uy,   Result = [| false; false; false; false; false; false; false; true |])>]
+    [<TestCase(2uy,   Result = [| false; false; false; false; false; false; true; false |])>]
+    [<TestCase(128uy, Result = [| true; false; false; false; false; false; false; false |])>]
+    [<TestCase(255uy, Result = [| true; true; true; true; true; true; true; true |])>]    
+    member test.``ToBitSequence should return its bit representation as booleans`` (input : byte) =
+        input.ToBitSequence() |> Seq.toArray
 
-    member this.Return(x) =
-        x
+[<TestFixture>]
+type ``Given a sequence of integers`` () =
+    [<Test>]
+    member test.``when it is empty Seq.chunk 3 should return an empty sequence`` () =
+        let chunks = Seq.empty<int> |> Seq.chunk 3 |> Seq.toArray
+        chunks      |> should haveLength 0
 
-let logger = new LoggingBuilder()
+    [<Test>]
+    member test.``when it has 12 elements Seq.chunk 3 should return sequence of array of length 3`` () =
+        let chunks = { 1..12 } |> Seq.chunk 3 |> Seq.toArray
+        chunks      |> should haveLength 4
+        chunks      |> Seq.forall (fun arr -> arr.Length = 3)
+                    |> should equal true
 
-let z = 
-    logger {
-        let! x = 42
-        let! y = 43
-        let! z = x + y
-        return z
-    }
-
-type State<'a, 's> = State of ('s -> 'a * 's)
-
-let runState (State f) s = f s
-let getState    = State (fun s -> (s, s))
-let putState s  = State (fun _ -> ((), s))
-
-type StateBuilder () = 
-    member this.Return(a) =
-        State (fun s -> (a, s))
-    member this.Bind(m, k) =
-        State (fun s ->
-            let (a, s') = runState m s
-            runState (k a) s')
-    member this.ReturnFrom(m) = m
-
-let state = new StateBuilder()
-
-let lift f = 
-    state {
-        let! s = getState
-        return! putState (f s)
-    }
-
-let DoSomething counter = 
-    printfn "DoSomething. Counter=%i " counter
-    counter + 1
-
-let FinalResult counter = 
-    printfn "FinalResult. Counter=%i " counter
-    counter
-
-let DoSomething' = lift DoSomething
-let FinalResult' = lift FinalResult
-
-let counterWorkflow = 
-    let s = state {
-        do! DoSomething'
-        do! DoSomething'
-        do! DoSomething'
-        do! FinalResult'
-        return "ok"
-        } 
-    runState s 0
-
-type MaybeBuilder () =
-    member this.Bind(x, f) = Option.bind f x
-    member this.Return(x) = Some x
-
-let maybe = new MaybeBuilder()
-
-let divideBy bottom top =
-    if bottom = 0
-    then None
-    else Some(top/bottom)
-
-let divWorkflow init x y z = 
-    maybe {
-        let! a = init |> divideBy x
-        let! b = a |> divideBy y
-        let! c = b |> divideBy z
-        return c
-    }
-
-type OrElseBuilder () =
-    member this.ReturnFrom(x) = x
-    member this.Combine(a, b) =
-        match a with
-        | Some _ -> a
-        | None   -> b
-    member this.Delay(f) = f()
-
-let orElse = new OrElseBuilder()
-
-let map1 = [ ("1","One"); ("2","Two") ] |> Map.ofList
-let map2 = [ ("A","Alice"); ("B","Bob") ] |> Map.ofList
-let map3 = [ ("CA","California"); ("NY","New York") ] |> Map.ofList
-
-let multiLookup key = orElse {
-    return! map1.TryFind key
-    return! map2.TryFind key
-    return! map3.TryFind key
-    }
-
-let strToInt str = match System.Int32.TryParse str with | true, x -> Some x | _ -> None
-
-type SomeBuilder() =
-    member this.Bind(m, k) = Option.bind k m
-    member this.Return(x)  = Some x
-let yourWorkflow = new SomeBuilder()
-
-let stringAddWorkflow x y z = 
-    yourWorkflow {
-        let! a = strToInt x
-        let! b = strToInt y
-        let! c = strToInt z
-        return a + b + c
-    }
-
-let strAdd str i = match strToInt str with | Some x -> Some <| x + i | _ -> None
-let (>>=) m f = Option.bind f m
-
-let good = strToInt "1" >>= strAdd "2" >>= strAdd "3"
-let bad  = strToInt "1" >>= strAdd "xyz" >>= strAdd "3"
-
+    [<Test>]
+    member test.``when it has 14 elements Seq.chunk 3 should return sequence of 5 arrays with the last having length of 2`` () =
+        let chunks = { 1..14 } |> Seq.chunk 3 |> Seq.toArray
+        chunks          |> should haveLength 5
+        chunks.[0..3]   |> Seq.forall (fun arr -> arr.Length = 3)
+                        |> should equal true
+        chunks.[4]      |> should haveLength 2
 

@@ -65,12 +65,12 @@ let destPort = bitReader outStream {
         return! BitReader.ReadInt32(16)
     }
 
-let seqNum, ackNum, dataOffset, reserved, ns, cwr, ece, urg, ack, psh, rst, syn, fin = 
+let seqNum, ackNum, dataOffset, ns, cwr, ece, urg, ack, psh, rst, syn, fin = 
     bitReader outStream {
         let! seqNum     = BitReader.ReadInt32()
         let! ackNum     = BitReader.ReadInt32()
         let! dataOffset = BitReader.ReadInt32(4)
-        let! reserved   = BitReader.ReadInt32(3)
+        do! BitReader.Skip(3)
 
         let! ns  = BitReader.ReadBool()
         let! cwr = BitReader.ReadBool()
@@ -82,7 +82,7 @@ let seqNum, ackNum, dataOffset, reserved, ns, cwr, ece, urg, ack, psh, rst, syn,
         let! syn = BitReader.ReadBool()
         let! fin = BitReader.ReadBool()
 
-        return seqNum, ackNum, dataOffset, reserved, ns, cwr, ece, urg, ack, psh, rst, syn, fin
+        return seqNum, ackNum, dataOffset, ns, cwr, ece, urg, ack, psh, rst, syn, fin
     }
 
 let winSize, chkSum, urgPtr, payload = bitReader outStream {
@@ -93,3 +93,4 @@ let winSize, chkSum, urgPtr, payload = bitReader outStream {
 
         return winSize, chkSum, urgPtr, payload |> Text.Encoding.UTF8.GetString
     }
+
