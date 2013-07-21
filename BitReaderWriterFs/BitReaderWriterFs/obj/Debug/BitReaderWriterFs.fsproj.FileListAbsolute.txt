@@ -1,0 +1,8 @@
+C:\SourceCode\personal\BitReaderWriterFs\BitReaderWriterFs\BitReaderWriterFs\bin\Debug\BitReaderWriterFs.XML
+C:\SourceCode\personal\BitReaderWriterFs\BitReaderWriterFs\BitReaderWriterFs\bin\Debug\BitReaderWriterFs.dll
+C:\SourceCode\personal\BitReaderWriterFs\BitReaderWriterFs\BitReaderWriterFs\bin\Debug\BitReaderWriterFs.pdb
+C:\SourceCode\personal\BitReaderWriterFs\BitReaderWriterFs\BitReaderWriterFs\bin\Debug\FSharp.Core.dll
+C:\SourceCode\personal\BitReaderWriterFs\BitReaderWriterFs\BitReaderWriterFs\bin\Debug\FSharp.Core.xml
+C:\SourceCode\personal\BitReaderWriterFs\BitReaderWriterFs\BitReaderWriterFs\obj\Debug\BitReaderWriterFs.dll
+C:\SourceCode\personal\BitReaderWriterFs\BitReaderWriterFs\BitReaderWriterFs\obj\Debug\BitReaderWriterFs.pdb
+C:\SourceCode\personal\BitReaderWriterFs\BitReaderWriterFs\BitReaderWriterFs\obj\Debug\BitReaderWriterFs.fsprojResolveAssemblyReference.cache
