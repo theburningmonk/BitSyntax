@@ -50,6 +50,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Simple.fsx" />
     <None Include="ParseTcp.fsx" />
     <None Include="Udp.fsx" />
   </ItemGroup>
