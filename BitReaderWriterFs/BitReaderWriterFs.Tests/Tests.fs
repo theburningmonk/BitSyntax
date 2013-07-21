@@ -1,5 +1,7 @@
 ﻿module Tests
 
+open System
+open System.IO
 open BitReaderWriterFs
 open FsUnit
 open NUnit.Framework
@@ -13,6 +15,18 @@ type ``Given a byte`` () =
     [<TestCase(255uy, Result = [| true; true; true; true; true; true; true; true |])>]    
     member test.``ToBitSequence should return its bit representation as booleans`` (input : byte) =
         input.ToBitSequence() |> Seq.toArray
+
+[<TestFixture>]
+type ``Given a stream`` () =
+    [<TestCase([||], Result = [||])>]
+    [<TestCase(0uy,         Result = [| false; false; false; false; false; false; false; false |])>]
+    [<TestCase(0uy, 1uy,    Result = [| false; false; false; false; false; false; false; false;
+                                        false; false; false; false; false; false; false; true |])>]
+    [<TestCase(0uy, 128uy,  Result = [| false; false; false; false; false; false; false; false;
+                                        true; false; false; false; false; false; false; false |])>]
+    member test.``ToBitSequence should return bit representation of all its constituent bytes`` ([<ParamArray>] bytes : byte[]) =
+        use stream = new MemoryStream(bytes)
+        stream.ToBitSequence() |> Seq.toArray
 
 [<TestFixture>]
 type ``Given a sequence of integers`` () =
