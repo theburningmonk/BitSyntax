@@ -19,7 +19,7 @@ let allT, allF, t, sixFOneT, bytes, world, ``!`` = bitReader stream {
         let! allF     = BitReader.ReadInt32(4)
         let! t        = BitReader.ReadBool()
         let! sixFOneT = BitReader.ReadInt32(7)
-        let! bytes   = BitReader.ReadBytes(6 * 8)  // "Hello "
+        let! bytes    = BitReader.ReadBytes(6 * 8)  // "Hello "
         let! world    = BitReader.ReadString(5 * 8)
         let! ``!``    = BitReader.ReadChar()
 

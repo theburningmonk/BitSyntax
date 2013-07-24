@@ -88,17 +88,20 @@ type BitReader private () =
     static member ReadChar (?n)     = Reader(N(defaultArg n 8), convertToChar)
     static member ReadString n      = Reader(N n, convertToString)
 
-    static member ReadAs n f        = Reader(N n, convertToBytes >> f)
+    static member ReadAs (n, f)     = Reader(N n, convertToBytes >> f)
     static member ReadRest ()       = Reader(Rest, convertToBytes)    
 
 type BitWriter private () =
     static let toBitArray n (bytes : byte[]) =
-        let bits = bytes |> Seq.collect (fun byte -> byte.ToBitSequence()) |> Seq.take n |> Seq.toArray
+        let bits = bytes 
+                   |> Seq.collect (fun byte -> byte.ToBitSequence())
+                   |> Seq.take n 
+                   |> Seq.toArray
         BitArray(bits)
 
     static member toByte (bits : bool[]) =
         let mutable byte = 0uy
-        for i = 0 to 7 do
+        for i = 0 to (min 7 bits.Length-1) do
             if bits.[i] 
             then byte <- byte <<< 1 ||| 1uy 
             else byte <- byte <<< 1
@@ -115,7 +118,7 @@ type BitWriter private () =
     
     static member WriteBool   (x : bool)        = BitArray([| x |]) 
     static member WriteBytes  (n, [<ParamArray>] x : byte[]) = toBitArray n x
-    static member WriteChar   (x : char, ?n)    = toBitArray (defaultArg n 8) <| BitConverter.GetBytes(x)
+    static member WriteChar   (x : char, ?n)    = toBitArray (defaultArg n 8) <| Text.Encoding.UTF8.GetBytes([| x |])
     static member WriteString (x : string, ?n)  = toBitArray (defaultArg n (x.Length * 8)) <| Text.Encoding.UTF8.GetBytes(x)
 
     /// Flushing a sequence of BitArray to the specified stream
