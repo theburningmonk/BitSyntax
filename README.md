@@ -3,6 +3,8 @@ BitReaderWriterFs
 
 Inspired by Erlang's Bit Syntax, this library contains a F# `BitReader` workflow and a set of helper functions for working with a `Stream` at bit level.
 
+### WARNING - THIS IS STILL A WORK-IN-PROGRESS!!
+
 ###Example - Writing and Reading segments of a TCP header###
 
     // write segments of a TCP header to a stream
