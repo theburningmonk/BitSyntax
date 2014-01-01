@@ -73,3 +73,7 @@ Inspired by Erlang's Bit Syntax, this library contains a F# `BitReader` workflow
 
         return winSize, chkSum, urgPtr, payload |> Text.Encoding.UTF8.GetString
     }
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/theburningmonk/bitreaderwriterfs/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
