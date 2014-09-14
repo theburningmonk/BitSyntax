@@ -45,10 +45,6 @@ module Seq =
 
 type Count      = | N of int | Rest
 type Reader<'a> = Reader of Count * (BitArray -> 'a)
-type Options    = 
-    {
-        Endianness  : Endianness
-    }
 
 type BitReader private () =
     static let toByteArray n (bitArr : BitArray) =
@@ -95,7 +91,7 @@ type BitReader private () =
     static member ReadString n      = Reader(N n, convertToString)
 
     static member ReadAs (n, f)     = Reader(N n, convertToBytes >> f)
-    static member ReadRest ()       = Reader(Rest, convertToBytes)    
+    static member ReadRest ()       = Reader(Rest, convertToBytes)
 
 type BitWriter private () =
     static let isLittle = BitConverter.IsLittleEndian
