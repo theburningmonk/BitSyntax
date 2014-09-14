@@ -1,6 +1,8 @@
-﻿#r "bin/BitReaderWriterFs.dll"
+﻿#r "bin/BitReaderWriterCs.dll"
+#r "bin/BitReaderWriterFs.dll"
 
 open System
+open BitReaderWriterCs
 open BitReaderWriterFs
 
 open System.IO
@@ -25,3 +27,16 @@ let allT, allF, t, sixFOneT, bytes, world, ``!`` = bitReader stream {
 
         return allT, allF, t, sixFOneT, bytes, world, ``!``
     }
+
+#time
+
+for n = 1 to 10000000 do
+    BitConverter.GetBytes(10s) |> ignore
+
+for n = 1 to 10000000 do
+    BitConverter.GetBytes(10s) |> ignore
+
+for n = 1 to 10000000 do
+    let n = Int16Wrapper(Instance = 10s)
+    n.GetBytes(Endianness.Little) |> ignore
+    

@@ -43,6 +43,11 @@
     <Reference Include="System.Numerics" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BitReaderWriterCs\BitReaderWriterCs.csproj">
+      <Name>BitReaderWriterCs</Name>
+      <Project>{4f0f5fb8-66e4-43c7-80b4-25893edca1c3}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\BitReaderWriterFs\BitReaderWriterFs.fsproj">
       <Name>BitReaderWriterFs</Name>
       <Project>{d188a8c4-72fd-4416-b063-d206c0554b53}</Project>

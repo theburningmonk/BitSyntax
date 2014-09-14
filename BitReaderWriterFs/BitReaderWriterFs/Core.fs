@@ -5,6 +5,8 @@ open System.Collections
 open System.Collections.Generic
 open System.IO
 
+open BitReaderWriterCs
+
 /// Helper extension methods
 [<AutoOpen>]
 module internal Ext =
@@ -43,6 +45,10 @@ module Seq =
 
 type Count      = | N of int | Rest
 type Reader<'a> = Reader of Count * (BitArray -> 'a)
+type Options    = 
+    {
+        Endianness  : Endianness
+    }
 
 type BitReader private () =
     static let toByteArray n (bitArr : BitArray) =
@@ -92,11 +98,17 @@ type BitReader private () =
     static member ReadRest ()       = Reader(Rest, convertToBytes)    
 
 type BitWriter private () =
+    static let isLittle = BitConverter.IsLittleEndian
+
     static let toBitArray n (bytes : byte[]) =
-        let bits = bytes 
-                   |> Seq.collect (fun byte -> byte.ToBitSequence())
-                   |> Seq.take n 
-                   |> Seq.toArray
+        let rec take n idx = 
+            seq {
+                if idx < bytes.Length && n > 0 then
+                    let n' = min n 8
+                    yield! bytes.[idx].ToBitSequence() |> Seq.skip (8 - n) |> Seq.take n'
+                    yield! take (n - n') (idx + 1)
+            }
+        let bits = take n 0 |> Seq.toArray
         BitArray(bits)
 
     static member toByte (bits : bool[]) =
