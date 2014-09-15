@@ -1,4 +1,4 @@
-﻿module BitReaderWriterFs
+﻿namespace BitReaderWriterFs
 
 open System
 open System.Collections
