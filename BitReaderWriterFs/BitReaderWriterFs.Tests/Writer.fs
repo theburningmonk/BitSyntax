@@ -95,6 +95,19 @@ type ``BitWriterBuilder tests`` () =
         getBytes 10s 4   |> should equal [| 160uy |]
         // 00001010 > take 2 bits > 10 > padded into > 10000000 = 128
         getBytes 10s 2   |> should equal [| 128uy |]
+
+    [<Test>]
+    member test.``bitWriter workflow should be able to write Uint16 to stream`` () =
+        let getBytes = getBytes (fun (input, n) -> BitWriter.WriteUint16(input, n))
+
+        getBytes 256us 16 |> should equal [| 0uy; 1uy |]
+        getBytes 256us 8  |> should equal [| 0uy |]
+
+        // 00001010 > take 4 bits from right > 1010
+        // which when padded into a full byte gives 10100000 = 128 + 32 = 160
+        getBytes 10us 4   |> should equal [| 160uy |]
+        // 00001010 > take 2 bits > 10 > padded into > 10000000 = 128
+        getBytes 10us 2   |> should equal [| 128uy |]
         
     [<Test>]
     member test.``bitWriter workflow should be able to write Int32 to stream`` () =
@@ -112,6 +125,21 @@ type ``BitWriterBuilder tests`` () =
         getBytes 10 2   |> should equal [| 128uy |]
         
     [<Test>]
+    member test.``bitWriter workflow should be able to write Uint32 to stream`` () =
+        let getBytes = getBytes (fun (input, n) -> BitWriter.WriteUint32(input, n))
+
+        getBytes 256u 32 |> should equal [| 0uy; 1uy; 0uy; 0uy |]
+        getBytes 256u 24 |> should equal [| 0uy; 1uy; 0uy |]
+        getBytes 256u 16 |> should equal [| 0uy; 1uy |]
+        getBytes 256u 8  |> should equal [| 0uy |]
+
+        getBytes 10u 8   |> should equal [| 10uy |]
+        
+        // see Int16 test for explanations
+        getBytes 10u 4   |> should equal [| 160uy |]
+        getBytes 10u 2   |> should equal [| 128uy |]
+        
+    [<Test>]
     member test.``bitWriter workflow should be able to write Int64 to stream`` () =
         let getBytes = getBytes (fun (input, n) -> BitWriter.WriteInt64(input, n))
 
@@ -125,3 +153,18 @@ type ``BitWriterBuilder tests`` () =
         // see Int16 test for explanations
         getBytes 10L 4   |> should equal [| 160uy |]
         getBytes 10L 2   |> should equal [| 128uy |]
+        
+    [<Test>]
+    member test.``bitWriter workflow should be able to write Uint64 to stream`` () =
+        let getBytes = getBytes (fun (input, n) -> BitWriter.WriteUint64(input, n))
+
+        getBytes 256UL 32 |> should equal [| 0uy; 1uy; 0uy; 0uy |]
+        getBytes 256UL 24 |> should equal [| 0uy; 1uy; 0uy |]
+        getBytes 256UL 16 |> should equal [| 0uy; 1uy |]
+        getBytes 256UL 8  |> should equal [| 0uy |]
+
+        getBytes 10UL 8   |> should equal [| 10uy |]
+        
+        // see Int16 test for explanations
+        getBytes 10UL 4   |> should equal [| 160uy |]
+        getBytes 10UL 2   |> should equal [| 128uy |]
