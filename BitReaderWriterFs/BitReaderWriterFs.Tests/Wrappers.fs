@@ -3,7 +3,6 @@
 open System
 open System.Linq
 open BitReaderWriterCs
-open FsUnit
 open NUnit.Framework
 open FsCheck
 

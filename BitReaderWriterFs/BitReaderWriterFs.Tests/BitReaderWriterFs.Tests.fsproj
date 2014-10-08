@@ -43,8 +43,8 @@
     <Compile Include="Extensions.fs" />
     <Compile Include="Wrappers.fs" />
     <Compile Include="Tools.fs" />
-    <Compile Include="Tests.fs" />
     <Compile Include="Writer.fs" />
+    <Compile Include="Tests.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
