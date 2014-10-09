@@ -168,3 +168,77 @@ type ``BitWriterBuilder tests`` () =
         // see Int16 test for explanations
         getBytes 10UL 4   |> should equal [| 160uy |]
         getBytes 10UL 2   |> should equal [| 128uy |]
+
+    [<Test>]
+    member test.``bitWriter workflow should be able to write bool to stream`` () =
+        let getBytes b = getBytes (fun (input, _n) -> BitWriter.WriteBool(input)) b 1
+
+        getBytes true   |> should equal [| 128uy |]
+        getBytes false  |> should equal [| 0uy |]
+
+    [<Test>]
+    member test.``bitWriter workflow should be able to write byte to stream`` () =
+        let getBytes = getBytes (fun (input, n) -> BitWriter.WriteByte(input, n))
+        
+        getBytes 255uy 1  |> should equal [| 128uy |]
+        getBytes 255uy 2  |> should equal [| 192uy |]
+        getBytes 255uy 3  |> should equal [| 224uy |]
+        getBytes 255uy 4  |> should equal [| 240uy |]
+        getBytes 255uy 5  |> should equal [| 248uy |]
+        getBytes 255uy 6  |> should equal [| 252uy |]
+        getBytes 255uy 7  |> should equal [| 254uy |]
+        getBytes 255uy 8  |> should equal [| 255uy |]
+
+    [<Test>]
+    member test.``bitWriter workflow should be able to write bytes to stream`` () =
+        let getBytes = getBytes (fun (input, n) -> BitWriter.WriteBytes(input, n))
+
+        getBytes [| 255uy; 255uy |] 5  |> should equal [| 248uy |]
+        getBytes [| 255uy; 255uy |] 9  |> should equal [| 255uy; 128uy |]
+        getBytes [| 255uy; 255uy |] 13 |> should equal [| 255uy; 248uy |]
+
+    [<Test>]
+    member test.``bitWriter workflow should be able to write char to stream`` () =
+        let getBytes char = getBytes (fun (input, _n) -> BitWriter.WriteChar(input)) char 8
+
+        getBytes 'X'    |> should equal [| 88uy |]
+
+    [<Test>]
+    member test.``bitWriter workflow should be able to write string to stream`` () =
+        let getBytes str = getBytes (fun (input, _n) -> BitWriter.WriteString(input)) str (str.Length * 8)
+
+        getBytes "X"    |> should equal [| 88uy |]
+        getBytes "XX"   |> should equal [| 88uy; 88uy |]
+
+    [<Test>]
+    member test.``bitWriter workflow should be able to write more than the buffer to stream`` () =
+        let getBytes str = getBytes (fun (input, _n) -> BitWriter.WriteString(input)) str (str.Length * 8)
+
+        let bigString = [| 1..1050 |] |> Array.map (fun _ -> 'X')
+                        |> (fun arr -> new System.String(arr))
+
+        getBytes bigString |> should equal <| ([| 1..1050 |] |> Array.map (fun _ -> 88uy))
+
+    [<Test>]
+    member test.``bitWriter workflow should be able to use for loops`` () =
+        let getBytes (bools : bool[]) = 
+            let stream = new MemoryStream()
+
+            do bitWriter stream {
+                for b in bools do
+                   do! BitWriter.WriteBool(b)
+            }
+
+            stream.ToArray()
+
+        // 1 > padded to > 10000000 > 128
+        getBytes [| true |]                                             |> should equal [| 128uy |]
+        getBytes [| true; true |]                                       |> should equal [| 192uy |]
+        getBytes [| true; true; true |]                                 |> should equal [| 224uy |]
+        getBytes [| true; true; true; true |]                           |> should equal [| 240uy |]
+        getBytes [| true; true; true; true; true |]                     |> should equal [| 248uy |]
+        getBytes [| true; true; true; true; true; true |]               |> should equal [| 252uy |]
+        getBytes [| true; true; true; true; true; true; true |]         |> should equal [| 254uy |]
+        getBytes [| true; true; true; true; true; true; true; true |]   |> should equal [| 255uy |]
+
+        getBytes [| true; true; false; true; false; true; true; true |] |> should equal [| 215uy |]
