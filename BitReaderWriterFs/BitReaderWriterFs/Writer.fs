@@ -119,8 +119,8 @@ module BitWriterWorkflow =
         member this.For (inputs, f)            = forLoop inputs f
         member this.Zero ()                    = zero()
         member this.Return _x                  = Writer(0, [||])
-        member this.Delay (f : unit -> unit)   =
-            f()
+        member this.Delay f =
+            f() |> ignore
             if index > 0 || bytePos > 0 then
                 stream.Write(buffer, 0, index+1)
 

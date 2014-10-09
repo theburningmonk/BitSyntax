@@ -78,7 +78,6 @@ type ``BitWriterBuilder tests`` () =
 
         do bitWriter stream {
             do! f(input, n)
-            do()
         }
 
         stream.ToArray()
@@ -225,8 +224,8 @@ type ``BitWriterBuilder tests`` () =
             let stream = new MemoryStream()
 
             do bitWriter stream {
-                for b in bools do
-                   do! BitWriter.WriteBool(b)
+                for b in bools do 
+                    do! BitWriter.WriteBool(b)
             }
 
             stream.ToArray()
