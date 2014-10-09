@@ -17,6 +17,7 @@ module BitWriterWorkflow =
         let bytes = (^a : (member GetBytes : Endianness -> seq<byte>) (wrapper, Endianness.Little))
         Writer(n, bytes |> Seq.take numBytes |> Seq.toArray)
 
+    // keep using the wrapper for now as it'll make life easier to support diff endianness later
     let writeInt16 n x              = new Int16Wrapper(Instance = x)  |> getWriter n        
     let writeUint16 n x             = new Uint16Wrapper(Instance = x) |> getWriter n
     let writeInt32 n x              = new Int32Wrapper(Instance = x)  |> getWriter n

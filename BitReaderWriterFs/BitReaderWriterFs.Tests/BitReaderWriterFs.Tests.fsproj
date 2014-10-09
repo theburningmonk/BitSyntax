@@ -40,9 +40,7 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <ItemGroup>
-    <Compile Include="Extensions.fs" />
     <Compile Include="Wrappers.fs" />
-    <Compile Include="Tools.fs" />
     <Compile Include="Writer.fs" />
     <Compile Include="Tests.fs" />
     <None Include="app.config" />

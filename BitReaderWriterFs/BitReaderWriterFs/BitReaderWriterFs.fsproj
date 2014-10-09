@@ -43,8 +43,8 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Core.fs" />
-    <Compile Include="Tools.fs" />
     <Compile Include="Writer.fs" />
+    <Compile Include="Reader.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\BitReaderWriterCs\BitReaderWriterCs.csproj">
