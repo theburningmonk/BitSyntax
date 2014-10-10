@@ -82,7 +82,7 @@ module BitWriterWorkflow =
                                     <<< (8 - canConsume 
                                            - inputBytePos)         // 10100000
                                     >>> bytePos                    // 00010100
-                    buffer.[index]   <- bufferByte ||| inputByte   // 11110000
+                    buffer.[index] <- bufferByte ||| inputByte     // 11110000
                     
                     bytePos <- bytePos + canConsume
             
