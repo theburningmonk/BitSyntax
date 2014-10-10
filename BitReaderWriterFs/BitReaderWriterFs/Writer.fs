@@ -3,6 +3,7 @@
 open System
 open System.IO
 
+[<AutoOpen>]
 module BitWriterWorkflow =
     open BitReaderWriterCs
 

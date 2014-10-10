@@ -6,25 +6,26 @@ open System.IO
 exception InsufficientBytes
 
 type Count      = | N of int | Rest
-type Reader<'a> = Reader of Count * (byte[] -> 'a)
+type Reader<'a> = Reader of Count * int * (byte[] -> 'a)
 
+[<AutoOpen>]
 module BitReaderWorkflow =
     type BitReader private () =
         
-        static member ReadInt16  n  = Reader(N n,  fun arr -> BitConverter.ToInt16(arr, 0))
-        static member ReadUint16 n  = Reader(N n,  fun arr -> BitConverter.ToUInt16(arr, 0))
-        static member ReadInt32  n  = Reader(N n,  fun arr -> BitConverter.ToInt32(arr, 0))
-        static member ReadUint32 n  = Reader(N n,  fun arr -> BitConverter.ToUInt32(arr, 0))
-        static member ReadInt64  n  = Reader(N n,  fun arr -> BitConverter.ToInt64(arr, 0))
-        static member ReadUint64 n  = Reader(N n,  fun arr -> BitConverter.ToUInt64(arr, 0))
-        static member ReadFloat  () = Reader(N 32, fun arr -> BitConverter.ToSingle(arr, 0))
-        static member ReadDouble () = Reader(N 64, fun arr -> BitConverter.ToDouble(arr, 0))
+        static member ReadInt16  n  = Reader(N n,  2, fun arr -> BitConverter.ToInt16(arr, 0))
+        static member ReadUint16 n  = Reader(N n,  2, fun arr -> BitConverter.ToUInt16(arr, 0))
+        static member ReadInt32  n  = Reader(N n,  4, fun arr -> BitConverter.ToInt32(arr, 0))
+        static member ReadUint32 n  = Reader(N n,  4, fun arr -> BitConverter.ToUInt32(arr, 0))
+        static member ReadInt64  n  = Reader(N n,  8, fun arr -> BitConverter.ToInt64(arr, 0))
+        static member ReadUint64 n  = Reader(N n,  8, fun arr -> BitConverter.ToUInt64(arr, 0))
+        static member ReadFloat  () = Reader(N 32, 4, fun arr -> BitConverter.ToSingle(arr, 0))
+        static member ReadDouble () = Reader(N 64, 8, fun arr -> BitConverter.ToDouble(arr, 0))
 
-        static member ReadBool   () = Reader(N 1, fun arr -> arr.[0] = 1uy)
-        static member ReadByte   n  = Reader(N n, fun arr -> arr.[0])
-        static member ReadBytes  n  = Reader(N (n * 8), id)
-        static member ReadChar   () = Reader(N 8, fun arr -> Convert.ToChar(arr.[0]))
-        static member ReadString n  = Reader(N (n * 8), fun arr -> Text.Encoding.UTF8.GetString arr)
+        static member ReadBool   () = Reader(N 1, 1, fun arr -> arr.[0] = 1uy)
+        static member ReadByte   n  = Reader(N n, 1, fun arr -> arr.[0])
+        static member ReadBytes  n  = Reader(N (n * 8), n, id)
+        static member ReadChar   () = Reader(N 8, 1, fun arr -> Convert.ToChar(arr.[0]))
+        static member ReadString n  = Reader(N (n * 8), n, fun arr -> Text.Encoding.UTF8.GetString arr)
 
     type BitReaderBuilder (stream : Stream) =
         let mutable buffer        = Array.zeroCreate<byte> 1024
@@ -57,32 +58,32 @@ module BitReaderWorkflow =
                     let canTake = min count (8 - bufferBytePos - outputBytePos)            
 
                     let outputByte = output.[outputIdx]
+                    let bufferByte = buffer.[bufferIdx]
 
-                    //                                          _
-                    // outputByte                             01000000
-                    let byte =                             //    __
-                        buffer.[bufferIdx]                 // 10011010
-                        >>> (8 - bufferBytePos - canTake)  // 00010011
-                        <<< (8 - canTake - outputBytePos)  // 00110000
-                        ||| outputByte                     // 01110000
+                    //                                           _
+                    // outputByte                              01000000
+                    let newOutputbyte =                     //    __
+                        bufferByte                          // 10011010
+                        >>> (8 - bufferBytePos - canTake)   // 00010011
+                        <<< (8 - canTake - outputBytePos)   // 00110000
+                        ||| outputByte                      // 01110000
 
-                    if canTake < count then // the last byte needs to be filled in right-to-left
-                        //                                    00000111
-                        output.[outputIdx] <- byte >>> (8 - outputBytePos - canTake)
+                    if canTake <= count then // the last byte needs to be filled in right-to-left
+                        //                                     00000111
+                        output.[outputIdx] <- newOutputbyte >>> (8 - outputBytePos - canTake)
                     else  // others need to leave space on the right for next byte 
-                        output.[outputIdx] <- byte         // 01110000
+                        output.[outputIdx] <- newOutputbyte // 01110000
 
-                    bufferBytePos <- (bufferBytePos + canTake) % 8
+                    bufferBytePos <- bufferBytePos + canTake
                     loop (count - canTake) outputIdx (outputBytePos + canTake)
 
             loop count 0 0
 
-        let readFrom (Reader(count, convert)) =
+        let readFrom (Reader(count, arrSize, convert)) =
             match count with
             | N n ->
                 // TODO : use pool buffer
-                let arrSize = if n % 8 <> 0 then n / 8 + 1 else n / 8
-                let arr     = Array.zeroCreate<byte> arrSize
+                let arr = Array.zeroCreate<byte> arrSize
                 readBits n arr
                 convert arr
             | Rest -> 
@@ -91,5 +92,6 @@ module BitReaderWorkflow =
         let bind reader cont = cont (readFrom reader)
 
         member this.Bind(reader, cont) = bind reader cont
+        member this.Return x           = x
 
     let bitReader stream = BitReaderBuilder(stream)

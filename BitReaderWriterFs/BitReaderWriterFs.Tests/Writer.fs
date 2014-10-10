@@ -1,6 +1,6 @@
 ﻿module Writer
 
-open BitReaderWriterFs.BitWriterWorkflow
+open BitReaderWriterFs
 open FsUnit
 open NUnit.Framework
 open FsCheck
