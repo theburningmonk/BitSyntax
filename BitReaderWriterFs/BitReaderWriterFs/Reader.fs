@@ -3,12 +3,29 @@
 open System
 open System.IO
 
-module BitReaderWorkflow =
-    exception InsufficientBytes
+exception InsufficientBytes
 
-    type Count      = | N of int | Rest
-    type Reader<'a> = Reader of Count * (byte[] -> 'a)
-   
+type Count      = | N of int | Rest
+type Reader<'a> = Reader of Count * (byte[] -> 'a)
+
+module BitReaderWorkflow =
+    type BitReader private () =
+        
+        static member ReadInt16  n  = Reader(N n,  fun arr -> BitConverter.ToInt16(arr, 0))
+        static member ReadUint16 n  = Reader(N n,  fun arr -> BitConverter.ToUInt16(arr, 0))
+        static member ReadInt32  n  = Reader(N n,  fun arr -> BitConverter.ToInt32(arr, 0))
+        static member ReadUint32 n  = Reader(N n,  fun arr -> BitConverter.ToUInt32(arr, 0))
+        static member ReadInt64  n  = Reader(N n,  fun arr -> BitConverter.ToInt64(arr, 0))
+        static member ReadUint64 n  = Reader(N n,  fun arr -> BitConverter.ToUInt64(arr, 0))
+        static member ReadFloat  () = Reader(N 32, fun arr -> BitConverter.ToSingle(arr, 0))
+        static member ReadDouble () = Reader(N 64, fun arr -> BitConverter.ToDouble(arr, 0))
+
+        static member ReadBool   () = Reader(N 1, fun arr -> arr.[0] = 1uy)
+        static member ReadByte   n  = Reader(N n, fun arr -> arr.[0])
+        static member ReadBytes  n  = Reader(N (n * 8), id)
+        static member ReadChar   () = Reader(N 8, fun arr -> Convert.ToChar(arr.[0]))
+        static member ReadString n  = Reader(N (n * 8), fun arr -> Text.Encoding.UTF8.GetString arr)
+
     type BitReaderBuilder (stream : Stream) =
         let mutable buffer        = Array.zeroCreate<byte> 1024
         let mutable bufferSize    = 0
@@ -56,17 +73,17 @@ module BitReaderWorkflow =
                         output.[outputIdx] <- byte         // 01110000
 
                     bufferBytePos <- (bufferBytePos + canTake) % 8
-                    readBits (count - canTake) outputIdx (outputBytePos + canTake) output
+                    loop (count - canTake) outputIdx (outputBytePos + canTake)
 
-            loop 0 0
+            loop count 0 0
 
         let readFrom (Reader(count, convert)) =
             match count with
             | N n ->
                 // TODO : use pool buffer
-                let arrSize = if count % 8 <> 0 then count / 8 + 1 else count / 8
+                let arrSize = if n % 8 <> 0 then n / 8 + 1 else n / 8
                 let arr     = Array.zeroCreate<byte> arrSize
-                readBits count arr
+                readBits n arr
                 convert arr
             | Rest -> 
                 failwith "todo"
@@ -74,3 +91,5 @@ module BitReaderWorkflow =
         let bind reader cont = cont (readFrom reader)
 
         member this.Bind(reader, cont) = bind reader cont
+
+    let bitReader stream = BitReaderBuilder(stream)
