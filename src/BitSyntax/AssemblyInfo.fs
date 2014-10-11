@@ -1,19 +1,14 @@
-﻿module AssemblyInfo
-
+﻿namespace System
 open System.Reflection
 open System.Runtime.CompilerServices
-open System.Runtime.InteropServices
 
-[<assembly: ComVisible(false)>]
-
-[<assembly: AssemblyTitle("BitSyntax")>]
-[<assembly: AssemblyDescription("Workflow and helper functions for working with stream of data at a bit level")>]
-
-[<assembly: AssemblyProduct("BitSyntax")>]
-[<assembly: AssemblyCopyright("Copyright © Yan Cui 2013")>]
-[<assembly: AssemblyVersion("1.0.0.*")>]
-[<assembly: AssemblyFileVersion("1.0.0.*")>]
-
+[<assembly: AssemblyTitleAttribute("BitSyntax")>]
+[<assembly: AssemblyProductAttribute("BitSyntax")>]
+[<assembly: AssemblyDescriptionAttribute("F# workflows for working with stream of data at a bit level")>]
+[<assembly: AssemblyVersionAttribute("0.1.0")>]
+[<assembly: AssemblyFileVersionAttribute("0.1.0")>]
 [<assembly: InternalsVisibleToAttribute("BitSyntax.Tests")>]
-
 do ()
+
+module internal AssemblyVersionInformation =
+    let [<Literal>] Version = "0.1.0"
