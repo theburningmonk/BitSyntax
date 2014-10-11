@@ -60,7 +60,7 @@ module BitWriterWorkflow =
         /// Consume the specified number of bits from the input array
         let consumeBits count (input : byte[]) =
             // add the last x bits to the buffer byte
-            let joinLastX toConsume bufferByte inputByte inputBytePos = 
+            let takeFromRight toConsume bufferByte inputByte inputBytePos = 
                 // e.g. input byte pos = 2, byte pos = 3, count = 3, to consume = 1
                 //                                  _
                 //                         byte: 11100000
@@ -74,7 +74,7 @@ module BitWriterWorkflow =
                   ||| bufferByte              // 11110000
 
             // add the first x bits to the buffer byte
-            let joinFirstX toConsume bufferByte inputByte inputBytePos =
+            let takeFromLeft toConsume bufferByte inputByte inputBytePos =
                 // e.g. input byte pos = 2, byte pos = 3, count = 3, to consume = 1
                 //                                  _
                 //                         byte: 11100000
@@ -103,8 +103,8 @@ module BitWriterWorkflow =
                     let inputByte  = input.[inputIdx]
                     
                     if count >= 8 
-                    then buffer.[index] <- joinFirstX canConsume bufferByte inputByte inputBytePos
-                    else buffer.[index] <- joinLastX canConsume bufferByte inputByte inputBytePos
+                    then buffer.[index] <- takeFromLeft canConsume bufferByte inputByte inputBytePos
+                    else buffer.[index] <- takeFromRight canConsume bufferByte inputByte inputBytePos
                     
                     bytePos <- bytePos + canConsume
             
