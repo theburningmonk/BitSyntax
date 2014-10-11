@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{6B7FF3A1-49E0-4035-BE65-454FB2EBC734}"
+	ProjectSection(SolutionItems) = preProject
+		src\.nuget\NuGet.Config = src\.nuget\NuGet.Config
+		src\.nuget\NuGet.exe = src\.nuget\NuGet.exe
+		src\.nuget\NuGet.targets = src\.nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitSyntaxCs", "src\BitSyntaxCs\BitSyntaxCs.csproj", "{9B7527E3-EA4E-477C-8F91-7CCA404A4BD2}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitSyntax", "src\BitSyntax\BitSyntax.fsproj", "{52000A90-75F7-4194-BD0A-CF16F70CBAB3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A747D9E9-81FC-4896-A00F-9F5D59B4258F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{202A4406-883D-44FB-8929-36C8197B92C5}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitSyntax.Examples", "examples\BitSyntax.Examples\BitSyntax.Examples.fsproj", "{5D1751EB-DE70-40D8-A266-762B8F5FB0AB}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitSyntax.Tests", "tests\BitSyntax.Tests\BitSyntax.Tests.fsproj", "{6987BE91-C70D-40C2-92F8-90BA7506AA27}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9B7527E3-EA4E-477C-8F91-7CCA404A4BD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B7527E3-EA4E-477C-8F91-7CCA404A4BD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B7527E3-EA4E-477C-8F91-7CCA404A4BD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B7527E3-EA4E-477C-8F91-7CCA404A4BD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52000A90-75F7-4194-BD0A-CF16F70CBAB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52000A90-75F7-4194-BD0A-CF16F70CBAB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52000A90-75F7-4194-BD0A-CF16F70CBAB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52000A90-75F7-4194-BD0A-CF16F70CBAB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D1751EB-DE70-40D8-A266-762B8F5FB0AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D1751EB-DE70-40D8-A266-762B8F5FB0AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D1751EB-DE70-40D8-A266-762B8F5FB0AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D1751EB-DE70-40D8-A266-762B8F5FB0AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6987BE91-C70D-40C2-92F8-90BA7506AA27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6987BE91-C70D-40C2-92F8-90BA7506AA27}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6987BE91-C70D-40C2-92F8-90BA7506AA27}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6987BE91-C70D-40C2-92F8-90BA7506AA27}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6987BE91-C70D-40C2-92F8-90BA7506AA27} = {A747D9E9-81FC-4896-A00F-9F5D59B4258F}
+		{5D1751EB-DE70-40D8-A266-762B8F5FB0AB} = {202A4406-883D-44FB-8929-36C8197B92C5}
+	EndGlobalSection
+EndGlobal
