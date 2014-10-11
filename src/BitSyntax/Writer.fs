@@ -53,9 +53,10 @@ module BitWriterWorkflow =
         static member WriteString (x : string)     = writeString (x.Length * 8) x
         
     and BitWriterBuilder(stream : Stream) =
-        let buffer = Array.zeroCreate<byte> 1024
-        let mutable index   = 0
-        let mutable bytePos = 0
+        let defaultBufferSize   = 128
+        let buffer              = Array.zeroCreate<byte> defaultBufferSize
+        let mutable index       = 0
+        let mutable bytePos     = 0
 
         /// Consume the specified number of bits from the input array
         let consumeBits count (input : byte[]) =

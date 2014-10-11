@@ -5,36 +5,41 @@ open System.IO
 
 exception InsufficientBytes
 
-type Count      = | N of int | Rest
-type Reader<'a> = Reader of Count * int * (byte[] -> 'a)
+type BitsCount  = int
+type ArraySize  = int
+
+type Count      = | N of BitsCount * ArraySize | Rest
+type Reader<'a> = Reader of Count * (byte[] -> 'a)
 
 [<AutoOpen>]
 module BitReaderWorkflow =
     type BitReader private () =
         
-        static member ReadInt16  (?numBits)  = Reader(N (defaultArg numBits 16),  2, fun arr -> BitConverter.ToInt16(arr, 0))
-        static member ReadUInt16 (?numBits)  = Reader(N (defaultArg numBits 16),  2, fun arr -> BitConverter.ToUInt16(arr, 0))
-        static member ReadInt32  (?numBits)  = Reader(N (defaultArg numBits 32),  4, fun arr -> BitConverter.ToInt32(arr, 0))
-        static member ReadUInt32 (?numBits)  = Reader(N (defaultArg numBits 32),  4, fun arr -> BitConverter.ToUInt32(arr, 0))
-        static member ReadInt64  (?numBits)  = Reader(N (defaultArg numBits 64),  8, fun arr -> BitConverter.ToInt64(arr, 0))
-        static member ReadUInt64 (?numBits)  = Reader(N (defaultArg numBits 64),  8, fun arr -> BitConverter.ToUInt64(arr, 0))
-        static member ReadFloat  ()          = Reader(N 32, 4, fun arr -> BitConverter.ToSingle(arr, 0))
-        static member ReadDouble ()          = Reader(N 64, 8, fun arr -> BitConverter.ToDouble(arr, 0))
+        static member ReadInt16  (?numBits)  = Reader(N (defaultArg numBits 16, 2), fun arr -> BitConverter.ToInt16(arr, 0))
+        static member ReadUInt16 (?numBits)  = Reader(N (defaultArg numBits 16, 2), fun arr -> BitConverter.ToUInt16(arr, 0))
+        static member ReadInt32  (?numBits)  = Reader(N (defaultArg numBits 32, 4), fun arr -> BitConverter.ToInt32(arr, 0))
+        static member ReadUInt32 (?numBits)  = Reader(N (defaultArg numBits 32, 4), fun arr -> BitConverter.ToUInt32(arr, 0))
+        static member ReadInt64  (?numBits)  = Reader(N (defaultArg numBits 64, 8), fun arr -> BitConverter.ToInt64(arr, 0))
+        static member ReadUInt64 (?numBits)  = Reader(N (defaultArg numBits 64, 8), fun arr -> BitConverter.ToUInt64(arr, 0))
+        static member ReadFloat  ()          = Reader(N (32, 4), fun arr -> BitConverter.ToSingle(arr, 0))
+        static member ReadDouble ()          = Reader(N (64, 8), fun arr -> BitConverter.ToDouble(arr, 0))
 
-        static member ReadBool   ()          = Reader(N 1, 1, fun arr -> arr.[0] = 1uy)
-        static member ReadByte   (?numBits)  = Reader(N (defaultArg numBits 8), 1, fun arr -> arr.[0])
-        static member ReadBytes  numBytes    = Reader(N (numBytes * 8), numBytes, id)
-        static member ReadChar   ()          = Reader(N 8, 1, fun arr -> Convert.ToChar(arr.[0]))
-        static member ReadString numChars    = Reader(N (numChars * 8), numChars, fun arr -> Text.Encoding.UTF8.GetString arr)
+        static member ReadBool   ()          = Reader(N (1, 1), fun arr -> arr.[0] = 1uy)
+        static member ReadByte   (?numBits)  = Reader(N (defaultArg numBits 8, 1), fun arr -> arr.[0])
+        static member ReadBytes  numBytes    = Reader(N (numBytes * 8, numBytes), id)
+        static member ReadChar   ()          = Reader(N (8, 1), fun arr -> Convert.ToChar(arr.[0]))
+        static member ReadString numChars    = Reader(N (numChars * 8, numChars), fun arr -> Text.Encoding.UTF8.GetString arr)
+        static member Rest ()                = Reader(Rest, id)
 
     type BitReaderBuilder (stream : Stream) =
-        let mutable buffer        = Array.zeroCreate<byte> 1024
+        let defaultBufferSize     = 128
+        let mutable buffer        = Array.zeroCreate<byte> defaultBufferSize
         let mutable bufferSize    = 0
         let mutable bufferIdx     = 0
         let mutable bufferBytePos = 0
 
         let readIntoBuffer () =
-            match stream.Read(buffer, 0, 1024) with
+            match stream.Read(buffer, 0, defaultBufferSize) with
             | -1 -> raise InsufficientBytes
             | n  -> bufferSize    <- n
                     bufferIdx     <- 0
@@ -79,9 +84,9 @@ module BitReaderWorkflow =
 
             loop count 0 0
 
-        let readFrom (Reader(count, arrSize, convert)) =
+        let readFrom (Reader(count, convert)) =
             match count with
-            | N n ->
+            | N (n, arrSize) ->
                 // TODO : use pool buffer
                 let arr = Array.zeroCreate<byte> arrSize
                 readBits n arr
