@@ -22,7 +22,7 @@ type ``BitWriter tests`` () =
     [<Test>]
     member test.``test WriteBytes`` () =
         BitWriter.WriteBytes([| 255uy; 1uy |])    |> should equal <| Writer(16, [| 255uy; 1uy |])
-        BitWriter.WriteBytes([| 255uy; 1uy |], 8) |> should equal <| Writer(8, [| 255uy; 1uy |])
+        BitWriter.WriteBytes([| 255uy; 1uy |], 1) |> should equal <| Writer(8, [| 255uy; 1uy |])
 
     [<Test>]
     member test.``test WriteChar`` () =
@@ -40,8 +40,8 @@ type ``BitWriter tests`` () =
 
     [<Test>]
     member test.``test WriteUint16`` () =
-        BitWriter.WriteUint16(256us) |> should equal <| Writer(16, [| 0uy; 1uy |])
-        BitWriter.WriteUint16(256us, 4) |> should equal <| Writer(4, [| 0uy |])
+        BitWriter.WriteUInt16(256us) |> should equal <| Writer(16, [| 0uy; 1uy |])
+        BitWriter.WriteUInt16(256us, 4) |> should equal <| Writer(4, [| 0uy |])
 
     [<Test>]
     member test.``test WriteInt32`` () =
@@ -50,8 +50,8 @@ type ``BitWriter tests`` () =
 
     [<Test>]
     member test.``test WriteUint32`` () =
-        BitWriter.WriteUint32(256u) |> should equal <| Writer(32, [| 0uy; 1uy; 0uy; 0uy |])
-        BitWriter.WriteUint32(256u, 12) |> should equal <| Writer(12, [| 0uy; 1uy |])
+        BitWriter.WriteUInt32(256u) |> should equal <| Writer(32, [| 0uy; 1uy; 0uy; 0uy |])
+        BitWriter.WriteUInt32(256u, 12) |> should equal <| Writer(12, [| 0uy; 1uy |])
 
     [<Test>]
     member test.``test WriteInt64`` () =
@@ -60,8 +60,8 @@ type ``BitWriter tests`` () =
 
     [<Test>]
     member test.``test WriteUint64`` () =
-        BitWriter.WriteUint64(256UL) |> should equal <| Writer(64, [| 0uy; 1uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy |])
-        BitWriter.WriteUint64(256UL, 12) |> should equal <| Writer(12, [| 0uy; 1uy |])
+        BitWriter.WriteUInt64(256UL) |> should equal <| Writer(64, [| 0uy; 1uy; 0uy; 0uy; 0uy; 0uy; 0uy; 0uy |])
+        BitWriter.WriteUInt64(256UL, 12) |> should equal <| Writer(12, [| 0uy; 1uy |])
 
     [<Test>]
     member test.``test WriteFloat`` () =
@@ -97,7 +97,7 @@ type ``BitWriterBuilder tests`` () =
 
     [<Test>]
     member test.``bitWriter workflow should be able to write Uint16 to stream`` () =
-        let getBytes = getBytes (fun (input, n) -> BitWriter.WriteUint16(input, n))
+        let getBytes = getBytes (fun (input, n) -> BitWriter.WriteUInt16(input, n))
 
         getBytes 256us 16 |> should equal [| 0uy; 1uy |]
         getBytes 256us 8  |> should equal [| 0uy |]
@@ -125,7 +125,7 @@ type ``BitWriterBuilder tests`` () =
         
     [<Test>]
     member test.``bitWriter workflow should be able to write Uint32 to stream`` () =
-        let getBytes = getBytes (fun (input, n) -> BitWriter.WriteUint32(input, n))
+        let getBytes = getBytes (fun (input, n) -> BitWriter.WriteUInt32(input, n))
 
         getBytes 256u 32 |> should equal [| 0uy; 1uy; 0uy; 0uy |]
         getBytes 256u 24 |> should equal [| 0uy; 1uy; 0uy |]
@@ -155,7 +155,7 @@ type ``BitWriterBuilder tests`` () =
         
     [<Test>]
     member test.``bitWriter workflow should be able to write Uint64 to stream`` () =
-        let getBytes = getBytes (fun (input, n) -> BitWriter.WriteUint64(input, n))
+        let getBytes = getBytes (fun (input, n) -> BitWriter.WriteUInt64(input, n))
 
         getBytes 256UL 32 |> should equal [| 0uy; 1uy; 0uy; 0uy |]
         getBytes 256UL 24 |> should equal [| 0uy; 1uy; 0uy |]
@@ -192,9 +192,8 @@ type ``BitWriterBuilder tests`` () =
     member test.``bitWriter workflow should be able to write bytes to stream`` () =
         let getBytes = getBytes (fun (input, n) -> BitWriter.WriteBytes(input, n))
 
-        getBytes [| 255uy; 255uy |] 5  |> should equal [| 248uy |]
-        getBytes [| 255uy; 255uy |] 9  |> should equal [| 255uy; 128uy |]
-        getBytes [| 255uy; 255uy |] 13 |> should equal [| 255uy; 248uy |]
+        getBytes [| 255uy; 255uy |] 1  |> should equal [| 255uy |]
+        getBytes [| 255uy; 255uy |] 2  |> should equal [| 255uy; 255uy |]
 
     [<Test>]
     member test.``bitWriter workflow should be able to write char to stream`` () =

@@ -38,17 +38,17 @@ module BitWriterWorkflow =
             f (min defaultSize <| defaultArg n defaultSize) x
 
         static member WriteInt16 (x, ?n)  = BitWriter.Write(x, 16, writeInt16, ?n = n)
-        static member WriteUint16 (x, ?n) = BitWriter.Write(x, 16, writeUint16, ?n = n)
+        static member WriteUInt16 (x, ?n) = BitWriter.Write(x, 16, writeUint16, ?n = n)
         static member WriteInt32 (x, ?n)  = BitWriter.Write(x, 32, writeInt32, ?n = n)
-        static member WriteUint32 (x, ?n) = BitWriter.Write(x, 32, writeUint32, ?n = n)
+        static member WriteUInt32 (x, ?n) = BitWriter.Write(x, 32, writeUint32, ?n = n)
         static member WriteInt64 (x, ?n)  = BitWriter.Write(x, 64, writeInt64, ?n = n)
-        static member WriteUint64 (x, ?n) = BitWriter.Write(x, 64, writeUint64, ?n = n)
+        static member WriteUInt64 (x, ?n) = BitWriter.Write(x, 64, writeUint64, ?n = n)
         static member WriteFloat x        = BitWriter.Write(x, 32, writeFloat)
         static member WriteDouble x       = BitWriter.Write(x, 64, writeDouble)
             
         static member WriteBool   x                = writeBool x
         static member WriteByte   (x, ?n)          = writeByte (defaultArg n 8) x
-        static member WriteBytes  (x : byte[], ?n) = writeBytes (defaultArg n <| x.Length * 8) x
+        static member WriteBytes  (x : byte[], ?n) = writeBytes ((defaultArg n <| x.Length) * 8) x
         static member WriteChar   x                = writeChar 8 x
         static member WriteString (x : string)     = writeString (x.Length * 8) x
         

@@ -43,7 +43,7 @@
     <Compile Include="Wrappers.fs" />
     <Compile Include="Writer.fs" />
     <Compile Include="Reader.fs" />
-    <Compile Include="Tests.fs" />
+    <Compile Include="ParseTcp.fs" />
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
