@@ -37,18 +37,18 @@ module BitWriterWorkflow =
         static member private Write (x : 'a, defaultSize, f, ?n) =            
             f (min defaultSize <| defaultArg n defaultSize) x
 
-        static member WriteInt16 (x, ?n)  = BitWriter.Write(x, 16, writeInt16, ?n = n)
-        static member WriteUInt16 (x, ?n) = BitWriter.Write(x, 16, writeUint16, ?n = n)
-        static member WriteInt32 (x, ?n)  = BitWriter.Write(x, 32, writeInt32, ?n = n)
-        static member WriteUInt32 (x, ?n) = BitWriter.Write(x, 32, writeUint32, ?n = n)
-        static member WriteInt64 (x, ?n)  = BitWriter.Write(x, 64, writeInt64, ?n = n)
-        static member WriteUInt64 (x, ?n) = BitWriter.Write(x, 64, writeUint64, ?n = n)
+        static member WriteInt16  (x, ?numBits) = BitWriter.Write(x, 16, writeInt16,  ?n = numBits)
+        static member WriteUInt16 (x, ?numBits) = BitWriter.Write(x, 16, writeUint16, ?n = numBits)
+        static member WriteInt32  (x, ?numBits) = BitWriter.Write(x, 32, writeInt32,  ?n = numBits)
+        static member WriteUInt32 (x, ?numBits) = BitWriter.Write(x, 32, writeUint32, ?n = numBits)
+        static member WriteInt64  (x, ?numBits) = BitWriter.Write(x, 64, writeInt64,  ?n = numBits)
+        static member WriteUInt64 (x, ?numBits) = BitWriter.Write(x, 64, writeUint64, ?n = numBits)
         static member WriteFloat x        = BitWriter.Write(x, 32, writeFloat)
         static member WriteDouble x       = BitWriter.Write(x, 64, writeDouble)
             
         static member WriteBool   x                = writeBool x
-        static member WriteByte   (x, ?n)          = writeByte (defaultArg n 8) x
-        static member WriteBytes  (x : byte[], ?n) = writeBytes ((defaultArg n <| x.Length) * 8) x
+        static member WriteByte   (x, ?numBits)    = writeByte (defaultArg numBits 8) x
+        static member WriteBytes  (x : byte[], ?numBytes) = writeBytes ((defaultArg numBytes <| x.Length) * 8) x
         static member WriteChar   x                = writeChar 8 x
         static member WriteString (x : string)     = writeString (x.Length * 8) x
         

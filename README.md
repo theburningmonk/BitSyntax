@@ -1,75 +1,70 @@
-BitReaderWriterFs
+BitSyntax
 =================
 
-Inspired by Erlang's Bit Syntax, this library contains a F# `BitReader` workflow and a set of helper functions for working with a `Stream` at bit level.
+Inspired by Erlang's [Bit Syntax](http://learnyousomeerlang.com/starting-out-for-real#bit-syntax), this library contains `bitWriter` and `bitReader` workflows for working with data at a bit level. 
 
-### WARNING - THIS IS STILL A WORK-IN-PROGRESS!!
+### Example - TCP header ###
 
-###Example - Writing and Reading segments of a TCP header###
+```fsharp
+open System.IO
+open BitSyntax
 
-    // write segments of a TCP header to a stream
-    let outStream = new MemoryStream()
+let stream = new MemoryStream()
 
-    let writeTcpHeaders (stream : Stream) =
-        seq {
-            yield BitWriter.WriteInt16(12345s) // source port
-            yield BitWriter.WriteInt16(12321s) // destination port
-            yield BitWriter.WriteInt32(1)      // sequence number
-            yield BitWriter.WriteInt32(1)      // ack number
-            yield BitWriter.WriteInt32(2, 4)   // data offset
-            yield BitWriter.WriteInt32(0, 3)   // reserved
-            yield BitWriter.WriteBool(false)   // NS
-            yield BitWriter.WriteBool(true)    // CWR
-            yield BitWriter.WriteBool(true)    // ECE
-            yield BitWriter.WriteBool(true)    // URG
-            yield BitWriter.WriteBool(true)    // ACK
-            yield BitWriter.WriteBool(true)    // PSH
-            yield BitWriter.WriteBool(false)   // RST
-            yield BitWriter.WriteBool(true)    // SYN
-            yield BitWriter.WriteBool(false)   // FIN
-            yield BitWriter.WriteInt16(8s)     // Window Size
-            yield BitWriter.WriteInt16(42s)    // Checksum
-            yield BitWriter.WriteInt16(1208s)  // Urgent Pointer
-            yield BitWriter.WriteString("Hello World!")  // payload
-        } |> BitWriter.Flush stream
+// write TCP headers
+do bitWriter stream {
+    do! BitWriter.WriteInt16(12345s)           // source port
+    do! BitWriter.WriteInt16(12321s)           // destination port
+    do! BitWriter.WriteInt32(1)                // sequence number
+    do! BitWriter.WriteInt32(1)                // ack number
+    do! BitWriter.WriteInt32(2, numBits = 4)   // data offset
+    do! BitWriter.WriteInt32(0, numBits = 3)   // reserved
+    do! BitWriter.WriteBool(false)             // NS
+    do! BitWriter.WriteBool(true)              // CWR
+    do! BitWriter.WriteBool(true)              // ECE
+    do! BitWriter.WriteBool(true)              // URG
+    do! BitWriter.WriteBool(true)              // ACK
+    do! BitWriter.WriteBool(true)              // PSH
+    do! BitWriter.WriteBool(false)             // RST
+    do! BitWriter.WriteBool(true)              // SYN
+    do! BitWriter.WriteBool(false)             // FIN
+    do! BitWriter.WriteInt16(8s)               // Window Size
+    do! BitWriter.WriteInt16(42s)              // Checksum
+    do! BitWriter.WriteInt16(1208s)            // Urgent Pointer
+    do! BitWriter.WriteString("Hello World!")  // payload
+}
 
-    writeTcpHeaders outStream
+// now read the TCP headers back
+stream.Position <- 0L
+let srcPort, destPort, 
+    seqNum, ackNum, dataOffset, 
+    ns, cwr, ece, urg, ack, psh, rst, syn, fin,
+    winSize, checkSum, pointer, payload = 
+        bitReader stream {
+            let! srcPort    = BitReader.ReadInt32(numBits = 16)
+            let! destPort   = BitReader.ReadInt32(numBits = 16)
+            let! seqNum     = BitReader.ReadInt32(numBits = 32)
+            let! ackNum     = BitReader.ReadInt32(numBits = 32)
+            let! dataOffset = BitReader.ReadInt32(numBits = 4)
+            let! _          = BitReader.ReadByte(numBits = 3)
 
-    // now read them back out of the stream
-    outStream.Position <- 0L
-    let srcPort = bitReader outStream {
-        return! BitReader.ReadInt32(16)
-    }
-    
-    let destPort = bitReader outStream {
-        return! BitReader.ReadInt32(16)
-    }
+            let! ns         = BitReader.ReadBool()
+            let! cwr        = BitReader.ReadBool()
+            let! ece        = BitReader.ReadBool()
+            let! urg        = BitReader.ReadBool()
+            let! ack        = BitReader.ReadBool()
+            let! psh        = BitReader.ReadBool()
+            let! rst        = BitReader.ReadBool()
+            let! syn        = BitReader.ReadBool()
+            let! fin        = BitReader.ReadBool()
+            let! winSize    = BitReader.ReadInt32(numBits = 16)
+            let! checkSum   = BitReader.ReadInt32(numBits = 16)
+            let! pointer    = BitReader.ReadInt32(numBits = 16)
+            let! payload    = BitReader.ReadString(numChars = 12)
 
-    let seqNum, ackNum, dataOffset, ns, cwr, ece, urg, ack, psh, rst, syn, fin = 
-        bitReader outStream {
-            let! seqNum     = BitReader.ReadInt32()
-            let! ackNum     = BitReader.ReadInt32()
-            let! dataOffset = BitReader.ReadInt32(4) // read 4 bits
-            do! BitReader.Skip(3)                    // skip over 3 bits
-
-            let! ns  = BitReader.ReadBool()
-            let! cwr = BitReader.ReadBool()
-            let! ece = BitReader.ReadBool()
-            let! urg = BitReader.ReadBool()
-            let! ack = BitReader.ReadBool()
-            let! psh = BitReader.ReadBool()
-            let! rst = BitReader.ReadBool()
-            let! syn = BitReader.ReadBool()
-            let! fin = BitReader.ReadBool()
-
-            return seqNum, ackNum, dataOffset, ns, cwr, ece, urg, ack, psh, rst, syn, fin
+            return srcPort, destPort, 
+                    seqNum, ackNum, dataOffset, 
+                    ns, cwr, ece, urg, ack, psh, rst, syn, fin,
+                    winSize, checkSum, pointer, payload
         }
-
-    let winSize, chkSum, urgPtr, payload = bitReader outStream {
-        let! winSize    = BitReader.ReadInt16()
-        let! chkSum     = BitReader.ReadInt16()
-        let! urgPtr     = BitReader.ReadInt16()
-        let! payload    = BitReader.ReadRest()  // read the read of the data in the stream
-
-        return winSize, chkSum, urgPtr, payload |> Text.Encoding.UTF8.GetString
-    }
+```
