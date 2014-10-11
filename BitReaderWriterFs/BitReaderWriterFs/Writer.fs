@@ -59,6 +59,35 @@ module BitWriterWorkflow =
 
         /// Consume the specified number of bits from the input array
         let consumeBits count (input : byte[]) =
+            // add the last x bits to the buffer byte
+            let joinLastX toConsume bufferByte inputByte inputBytePos = 
+                // e.g. input byte pos = 2, byte pos = 3, count = 3, to consume = 1
+                //                                  _
+                //                         byte: 11100000
+                //                                    _
+                inputByte                     // 00110101
+                  >>> inputBytePos            // 00001101
+                  <<< inputBytePos            // 00110100
+                  <<< (8 - toConsume
+                          - inputBytePos)     // 10100000
+                  >>> bytePos                 // 00010100
+                  ||| bufferByte              // 11110000
+
+            // add the first x bits to the buffer byte
+            let joinFirstX toConsume bufferByte inputByte inputBytePos =
+                // e.g. input byte pos = 2, byte pos = 3, count = 3, to consume = 1
+                //                                  _
+                //                         byte: 11100000
+                //                                 _
+                inputByte                     // 00110101
+                  <<< inputBytePos            // 11010000
+                  >>> inputBytePos            // 00110100
+                  >>> (8 - toConsume
+                         - inputBytePos)      // 00000001
+                  <<< (8 - toConsume
+                         - bytePos)           // 00010000
+                  ||| bufferByte              // 11110000
+
             let rec loop count inputIdx inputBytePos =
                 if count > 0 then
                     if bytePos >= 8 then
@@ -72,27 +101,21 @@ module BitWriterWorkflow =
                     let canConsume = min count <| min (8 - inputBytePos) (8 - bytePos)
                     let bufferByte = buffer.[index]
                     let inputByte  = input.[inputIdx]
-
-                    // e.g. input byte pos = 2, byte pos = 3, count = 3, can consume = 1
-                    //                                                   _
-                    //                                          byte: 11100000
-                    //                                                     _
-                    let inputByte = inputByte                      // 00110101
-                                    >>> inputBytePos               // 00001101
-                                    <<< inputBytePos               // 00110100
-                                    <<< (8 - canConsume 
-                                           - inputBytePos)         // 10100000
-                                    >>> bytePos                    // 00010100
-                    buffer.[index] <- bufferByte ||| inputByte     // 11110000
+                    
+                    if count >= 8 
+                    then buffer.[index] <- joinFirstX canConsume bufferByte inputByte inputBytePos
+                    else buffer.[index] <- joinLastX canConsume bufferByte inputByte inputBytePos
                     
                     bytePos <- bytePos + canConsume
             
+                    let count = count - canConsume
                     let inputIdx, inputBytePos = 
                         match inputBytePos + canConsume with
-                        | 8   -> inputIdx + 1, 0
-                        | pos -> inputIdx, pos
+                        | 8 -> inputIdx + 1, 0
+                        | pos when count >= 8 -> inputIdx, pos
+                        | _ -> inputIdx, 0
 
-                    loop (count - canConsume) inputIdx inputBytePos
+                    loop count inputIdx inputBytePos
 
             loop count 0 0
 

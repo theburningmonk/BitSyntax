@@ -68,7 +68,7 @@ module BitReaderWorkflow =
                         <<< (8 - canTake - outputBytePos)   // 00110000
                         ||| outputByte                      // 01110000
 
-                    if canTake <= count then // the last byte needs to be filled in right-to-left
+                    if canTake = count then // the last byte needs to be filled in right-to-left
                         //                                     00000111
                         output.[outputIdx] <- newOutputbyte >>> (8 - outputBytePos - canTake)
                     else  // others need to leave space on the right for next byte 
