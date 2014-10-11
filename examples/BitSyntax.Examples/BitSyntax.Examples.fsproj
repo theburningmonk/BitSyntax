@@ -51,7 +51,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ParseTcp.fsx" />
+    <None Include="TcpHeader.fsx" />
     <None Include="Udp.fsx" />
   </ItemGroup>
   <PropertyGroup>
