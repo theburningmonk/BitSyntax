@@ -38,6 +38,11 @@ module BitReaderWorkflow =
         let mutable bufferIdx     = 0
         let mutable bufferBytePos = 0
 
+        let incrBufferIdx () =
+            if bufferBytePos = 8 then 
+                bufferBytePos <- 0
+                bufferIdx     <- bufferIdx + 1
+
         let readIntoBuffer () =
             match stream.Read(buffer, 0, defaultBufferSize) with
             | -1 -> raise InsufficientBytes
@@ -48,9 +53,8 @@ module BitReaderWorkflow =
         let readBits count (output : byte[]) = 
             let rec loop count outputIdx outputBytePos = 
                 if count > 0 then
-                    if bufferBytePos = 8 then 
-                        bufferBytePos <- 0
-                        bufferIdx     <- bufferIdx + 1
+                    incrBufferIdx()
+
                     if bufferIdx >= bufferSize then
                         readIntoBuffer()
                    
@@ -85,9 +89,18 @@ module BitReaderWorkflow =
             loop count 0 0
 
         let readRest () =
-            if bufferBytePos = 8 then 
-                bufferBytePos <- 0
-                bufferIdx     <- bufferIdx + 1
+            let offset count (buffer : byte[]) = 
+                let temp = buffer.[0]
+                buffer.[0] <- temp <<< count
+
+                for idx = 1 to buffer.Length-1 do
+                    let byte, prevByte = buffer.[idx], buffer.[idx-1]
+                    buffer.[idx-1] <- byte >>> (8 - count) ||| prevByte
+                    buffer.[idx]   <- byte <<< count
+            
+                buffer
+
+            incrBufferIdx()
 
             let leftOnBuffer = bufferSize - bufferIdx
             let leftOnStream = stream.Length - stream.Position |> int
@@ -95,16 +108,20 @@ module BitReaderWorkflow =
             let arrSize = leftOnBuffer + leftOnStream
             let bytes   = Array.zeroCreate<byte> arrSize
 
-            // read the bytes left on the buffer
             for idx = bufferIdx to bufferSize-1 do
                 bytes.[idx - bufferIdx] <- buffer.[idx]
 
-            // then read bytes left on the stream
             if stream.Read(bytes, leftOnBuffer, leftOnStream) <> leftOnStream then
                 raise InsufficientBytes
 
             if bufferBytePos = 0 then bytes
-            else [||]
+            else // if we're starting off with a partly consumed byte, then we'll need to 
+                 // offset the bits in each byte
+                 // e.g. 10|01000100|01011100|(padding)
+                 // becomes 01000100|01011100|(padding, hence the Seq.take and Seq.toArray)
+                 offset bufferBytePos bytes
+                 |> Seq.take (arrSize - 1)
+                 |> Seq.toArray
 
         let readFrom (Reader(count, convert)) =
             match count with
