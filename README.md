@@ -5,7 +5,7 @@ Inspired by Erlang's [Bit Syntax](http://learnyousomeerlang.com/starting-out-for
 
 [![](https://raw.githubusercontent.com/theburningmonk/BitSyntax/master/nuget/banner.png)](https://www.nuget.org/packages/BitSyntax/)
 
-### Example - TCP header ###
+### Example - TCP header
 
 ```fsharp
 open System
@@ -70,3 +70,10 @@ let srcPort, destPort,
                     winSize, checkSum, pointer, payload
         }
 ```
+
+### Resources
+
+
+- Download [BitSyntax](https://www.nuget.org/packages/BitSyntax/)
+- [Bug Tracker](https://github.com/theburningmonk/BitSyntax/issues)
+- Follow [@theburningmonk](https://twitter.com/theburningmonk) on Twitter for upates
