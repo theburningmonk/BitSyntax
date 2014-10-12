@@ -1,10 +1,10 @@
 ﻿#r "bin/BitSyntaxCs.dll"
 #r "bin/BitSyntax.dll"
 
-open System.IO
+open System
 open BitSyntax
 
-let stream = new MemoryStream()
+let stream = new IO.MemoryStream()
 
 // write TCP headers
 do bitWriter stream {
@@ -55,7 +55,7 @@ let srcPort, destPort,
             let! winSize    = BitReader.ReadInt32(numBits = 16)
             let! checkSum   = BitReader.ReadInt32(numBits = 16)
             let! pointer    = BitReader.ReadInt32(numBits = 16)
-            let! payload    = BitReader.ReadString(numChars = 12)
+            let! payload    = BitReader.Rest(Text.Encoding.UTF8.GetString)
 
             return srcPort, destPort, 
                     seqNum, ackNum, dataOffset, 
