@@ -89,27 +89,30 @@ module BitReaderWorkflow =
             loop count 0 0
 
         let readRest () =
-            let offset count (buffer : byte[]) = 
-                let temp = buffer.[0]
-                buffer.[0] <- temp <<< count
+            let offset partialConsumed count (buffer : byte[]) = 
+                let mutable partialConsumed = partialConsumed
 
-                for idx = 1 to buffer.Length-1 do
-                    let byte, prevByte = buffer.[idx], buffer.[idx-1]
-                    buffer.[idx-1] <- byte >>> (8 - count) ||| prevByte
-                    buffer.[idx]   <- byte <<< count
+                for idx = 0 to buffer.Length-1 do
+                    let temp = buffer.[idx]
+                    buffer.[idx] <- partialConsumed <<< count
+                                    ||| (temp >>> (8 - count))
+                    partialConsumed <- temp
             
                 buffer
 
             incrBufferIdx()
-
-            let leftOnBuffer = bufferSize - bufferIdx
+            
             let leftOnStream = stream.Length - stream.Position |> int
+            let leftOnBuffer = if bufferBytePos = 0
+                               then bufferSize - bufferIdx
+                               else bufferSize - bufferIdx - 1
 
             let arrSize = leftOnBuffer + leftOnStream
             let bytes   = Array.zeroCreate<byte> arrSize
 
-            for idx = bufferIdx to bufferSize-1 do
-                bytes.[idx - bufferIdx] <- buffer.[idx]
+            let startBufferIdx = if bufferBytePos = 0 then bufferIdx else bufferIdx + 1
+            for idx = startBufferIdx to bufferSize-1 do
+                bytes.[idx - startBufferIdx] <- buffer.[idx]
 
             if stream.Read(bytes, leftOnBuffer, leftOnStream) <> leftOnStream then
                 raise InsufficientBytes
@@ -119,9 +122,8 @@ module BitReaderWorkflow =
                  // offset the bits in each byte
                  // e.g. 10|01000100|01011100|(padding)
                  // becomes 01000100|01011100|(padding, hence the Seq.take and Seq.toArray)
-                 offset bufferBytePos bytes
-                 |> Seq.take (arrSize - 1)
-                 |> Seq.toArray
+                 let partialConsumed = buffer.[bufferIdx]
+                 offset partialConsumed bufferBytePos bytes
 
         let readFrom (Reader(count, convert)) =
             match count with
