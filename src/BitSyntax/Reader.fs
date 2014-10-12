@@ -29,7 +29,7 @@ module BitReaderWorkflow =
         static member ReadBytes  numBytes    = Reader(N (numBytes * 8, numBytes), id)
         static member ReadChar   ()          = Reader(N (8, 1), fun arr -> Convert.ToChar(arr.[0]))
         static member ReadString numChars    = Reader(N (numChars * 8, numChars), fun arr -> Text.Encoding.UTF8.GetString arr)
-        static member Rest ()                = Reader(Rest, id)
+        static member Rest convert           = Reader(Rest, convert)
 
     type BitReaderBuilder (stream : Stream) =
         let defaultBufferSize     = 128
@@ -84,6 +84,28 @@ module BitReaderWorkflow =
 
             loop count 0 0
 
+        let readRest () =
+            if bufferBytePos = 8 then 
+                bufferBytePos <- 0
+                bufferIdx     <- bufferIdx + 1
+
+            let leftOnBuffer = bufferSize - bufferIdx
+            let leftOnStream = stream.Length - stream.Position |> int
+
+            let arrSize = leftOnBuffer + leftOnStream
+            let bytes   = Array.zeroCreate<byte> arrSize
+
+            // read the bytes left on the buffer
+            for idx = bufferIdx to bufferSize-1 do
+                bytes.[idx - bufferIdx] <- buffer.[idx]
+
+            // then read bytes left on the stream
+            if stream.Read(bytes, leftOnBuffer, leftOnStream) <> leftOnStream then
+                raise InsufficientBytes
+
+            if bufferBytePos = 0 then bytes
+            else [||]
+
         let readFrom (Reader(count, convert)) =
             match count with
             | N (n, arrSize) ->
@@ -92,7 +114,7 @@ module BitReaderWorkflow =
                 readBits n arr
                 convert arr
             | Rest -> 
-                failwith "todo"
+                readRest() |> convert
 
         let bind reader cont = cont (readFrom reader)
 

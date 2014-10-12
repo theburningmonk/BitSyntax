@@ -50,7 +50,7 @@ type ``Given a sequence of values`` () =
                 let! l = BitReader.ReadBytes(3)
 
                 let! m = BitReader.ReadChar()
-                let! n = BitReader.ReadString(12)
+                let! n = BitReader.Rest(System.Text.Encoding.UTF8.GetString)
 
                 return a, b, c, d, e, f, g, h, i, j, k, l, m, n
             }
@@ -120,7 +120,7 @@ type ``Given a sequence of values`` () =
                     let! winSize    = BitReader.ReadInt32(16)
                     let! checkSum   = BitReader.ReadInt32(16)
                     let! pointer    = BitReader.ReadInt32(16)
-                    let! payload    = BitReader.ReadString(12)
+                    let! payload    = BitReader.Rest(System.Text.Encoding.UTF8.GetString)
 
                     return srcPort, destPort, 
                            seqNum, ackNum, dataOffset, 
