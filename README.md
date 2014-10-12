@@ -1,15 +1,17 @@
 BitSyntax
 =================
 
-Inspired by Erlang's [Bit Syntax](http://learnyousomeerlang.com/starting-out-for-real#bit-syntax), this library contains `bitWriter` and `bitReader` workflows for working with data at a bit level. 
+Inspired by Erlang's [Bit Syntax](http://learnyousomeerlang.com/starting-out-for-real#bit-syntax), this library contains `bitWriter` and `bitReader` workflows for working with data at a bit level.
+
+[![](https://raw.githubusercontent.com/theburningmonk/BitSyntax/master/nuget/banner.png)](https://www.nuget.org/packages/BitSyntax/)
 
 ### Example - TCP header ###
 
 ```fsharp
-open System.IO
+open System
 open BitSyntax
 
-let stream = new MemoryStream()
+let stream = new IO.MemoryStream()
 
 // write TCP headers
 do bitWriter stream {
@@ -60,7 +62,7 @@ let srcPort, destPort,
             let! winSize    = BitReader.ReadInt32(numBits = 16)
             let! checkSum   = BitReader.ReadInt32(numBits = 16)
             let! pointer    = BitReader.ReadInt32(numBits = 16)
-            let! payload    = BitReader.ReadString(numChars = 12)
+            let! payload    = BitReader.Rest(Text.Encoding.UTF8.GetString) // read the rest of the stream as payload
 
             return srcPort, destPort, 
                     seqNum, ackNum, dataOffset, 
