@@ -4,10 +4,10 @@ using System.Reflection;
 [assembly: AssemblyTitleAttribute("BitSyntax")]
 [assembly: AssemblyProductAttribute("BitSyntax")]
 [assembly: AssemblyDescriptionAttribute("F# workflows for working with stream of data at a bit level")]
-[assembly: AssemblyVersionAttribute("0.1.0")]
-[assembly: AssemblyFileVersionAttribute("0.1.0")]
+[assembly: AssemblyVersionAttribute("0.2.0")]
+[assembly: AssemblyFileVersionAttribute("0.2.0")]
 namespace System {
     internal static class AssemblyVersionInformation {
-        internal const string Version = "0.1.0";
+        internal const string Version = "0.2.0";
     }
 }

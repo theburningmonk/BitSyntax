@@ -20,5 +20,8 @@
     <file src="..\build\BitSyntax.dll" target="lib/net45" />
     <file src="..\build\BitSyntax.pdb" target="lib/net45" />
     <file src="..\build\BitSyntax.xml" target="lib/net45" />
+    <file src="..\build\BitSyntaxCs.dll" target="lib/net45" />
+    <file src="..\build\BitSyntaxCs.pdb" target="lib/net45" />
+    <file src="..\build\BitSyntaxCs.xml" target="lib/net45" />
   </files>
 </package>
