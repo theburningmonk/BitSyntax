@@ -28,7 +28,7 @@ module BitReaderWorkflow =
 
         static member ReadBool   ()          = Reader(N (1, 1), fun arr -> arr.[0] = 1uy)
         static member ReadByte   (?numBits)  = Reader(N (defaultArg numBits 8, 1), fun arr -> arr.[0])
-        static member ReadBytes  numBytes    = Reader(N (numBytes * 8, numBytes), id)
+        static member ReadBytes  (numBytes, ?isBigEndian)  = Reader(N (numBytes * 8, numBytes), fun arr -> convertEndian arr (defaultArg isBigEndian true))
         static member ReadChar   ()          = Reader(N (8, 1), fun arr -> Convert.ToChar(arr.[0]))
         static member ReadString numChars    = Reader(N (numChars * 8, numChars), fun arr -> Text.Encoding.UTF8.GetString arr)
         static member Rest convert           = Reader(Rest, convert)
