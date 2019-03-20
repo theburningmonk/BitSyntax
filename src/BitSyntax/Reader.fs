@@ -11,22 +11,24 @@ type ArraySize  = int
 type Count      = | N of BitsCount * ArraySize | Rest
 type Reader<'a> = Reader of Count * (byte[] -> 'a)
 
+
 [<AutoOpen>]
 module BitReaderWorkflow =
+    let convertEndian arr isBigEndian = if (isBigEndian <> (not BitConverter.IsLittleEndian)) then (arr |> Array.rev) else arr
     type BitReader private () =
-        
-        static member ReadInt16  (?numBits)  = Reader(N (defaultArg numBits 16, 2), fun arr -> BitConverter.ToInt16(arr, 0))
-        static member ReadUInt16 (?numBits)  = Reader(N (defaultArg numBits 16, 2), fun arr -> BitConverter.ToUInt16(arr, 0))
-        static member ReadInt32  (?numBits)  = Reader(N (defaultArg numBits 32, 4), fun arr -> BitConverter.ToInt32(arr, 0))
-        static member ReadUInt32 (?numBits)  = Reader(N (defaultArg numBits 32, 4), fun arr -> BitConverter.ToUInt32(arr, 0))
-        static member ReadInt64  (?numBits)  = Reader(N (defaultArg numBits 64, 8), fun arr -> BitConverter.ToInt64(arr, 0))
-        static member ReadUInt64 (?numBits)  = Reader(N (defaultArg numBits 64, 8), fun arr -> BitConverter.ToUInt64(arr, 0))
+
+        static member ReadInt16  (?numBits, ?isBigEndian)  = Reader(N (defaultArg numBits 16, 2), fun arr -> BitConverter.ToInt16((convertEndian arr (defaultArg isBigEndian true)), 0))
+        static member ReadUInt16 (?numBits, ?isBigEndian)  = Reader(N (defaultArg numBits 16, 2), fun arr -> BitConverter.ToUInt16((convertEndian arr (defaultArg isBigEndian true)), 0))
+        static member ReadInt32  (?numBits, ?isBigEndian)  = Reader(N (defaultArg numBits 32, 4), fun arr -> BitConverter.ToInt32((convertEndian arr (defaultArg isBigEndian true)), 0))
+        static member ReadUInt32 (?numBits, ?isBigEndian)  = Reader(N (defaultArg numBits 32, 4), fun arr -> BitConverter.ToUInt32((convertEndian arr (defaultArg isBigEndian true)), 0))
+        static member ReadInt64  (?numBits, ?isBigEndian)  = Reader(N (defaultArg numBits 64, 8), fun arr -> BitConverter.ToInt64((convertEndian arr (defaultArg isBigEndian true)), 0))
+        static member ReadUInt64 (?numBits, ?isBigEndian)  = Reader(N (defaultArg numBits 64, 8), fun arr -> BitConverter.ToUInt64((convertEndian arr (defaultArg isBigEndian true)), 0))
         static member ReadFloat  ()          = Reader(N (32, 4), fun arr -> BitConverter.ToSingle(arr, 0))
         static member ReadDouble ()          = Reader(N (64, 8), fun arr -> BitConverter.ToDouble(arr, 0))
 
         static member ReadBool   ()          = Reader(N (1, 1), fun arr -> arr.[0] = 1uy)
         static member ReadByte   (?numBits)  = Reader(N (defaultArg numBits 8, 1), fun arr -> arr.[0])
-        static member ReadBytes  numBytes    = Reader(N (numBytes * 8, numBytes), id)
+        static member ReadBytes  (numBytes, ?isBigEndian)  = Reader(N (numBytes * 8, numBytes), fun arr -> convertEndian arr (defaultArg isBigEndian true))
         static member ReadChar   ()          = Reader(N (8, 1), fun arr -> Convert.ToChar(arr.[0]))
         static member ReadString numChars    = Reader(N (numChars * 8, numChars), fun arr -> Text.Encoding.UTF8.GetString arr)
         static member Rest convert           = Reader(Rest, convert)

@@ -1,17 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitSyntaxCs", "src\BitSyntaxCs\BitSyntaxCs.csproj", "{9B7527E3-EA4E-477C-8F91-7CCA404A4BD2}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitSyntax", "src\BitSyntax\BitSyntax.fsproj", "{52000A90-75F7-4194-BD0A-CF16F70CBAB3}"
-EndProject
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.489
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A747D9E9-81FC-4896-A00F-9F5D59B4258F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{202A4406-883D-44FB-8929-36C8197B92C5}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitSyntax.Examples", "examples\BitSyntax.Examples\BitSyntax.Examples.fsproj", "{5D1751EB-DE70-40D8-A266-762B8F5FB0AB}"
-EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitSyntax.Tests", "tests\BitSyntax.Tests\BitSyntax.Tests.fsproj", "{6987BE91-C70D-40C2-92F8-90BA7506AA27}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution items", "solution items", "{6F37D0C0-3696-4DCA-992B-3F9978CD4B58}"
 	ProjectSection(SolutionItems) = preProject
@@ -21,6 +15,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution items", "solution 
 		README.md = README.md
 		RELEASE_NOTES.md = RELEASE_NOTES.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitSyntaxCs", "src\BitSyntaxCs\BitSyntaxCs.csproj", "{9B7527E3-EA4E-477C-8F91-7CCA404A4BD2}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitSyntax", "src\BitSyntax\BitSyntax.fsproj", "{52000A90-75F7-4194-BD0A-CF16F70CBAB3}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitSyntax.Examples", "examples\BitSyntax.Examples\BitSyntax.Examples.fsproj", "{5D1751EB-DE70-40D8-A266-762B8F5FB0AB}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "BitSyntax.Tests", "tests\BitSyntax.Tests\BitSyntax.Tests.fsproj", "{6987BE91-C70D-40C2-92F8-90BA7506AA27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,7 +51,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{6987BE91-C70D-40C2-92F8-90BA7506AA27} = {A747D9E9-81FC-4896-A00F-9F5D59B4258F}
 		{5D1751EB-DE70-40D8-A266-762B8F5FB0AB} = {202A4406-883D-44FB-8929-36C8197B92C5}
+		{6987BE91-C70D-40C2-92F8-90BA7506AA27} = {A747D9E9-81FC-4896-A00F-9F5D59B4258F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A27C7F8D-036B-49BF-B162-E51D099AF571}
 	EndGlobalSection
 EndGlobal
